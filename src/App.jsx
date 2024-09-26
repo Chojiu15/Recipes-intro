@@ -10,50 +10,71 @@ import RomainRecipeCard from './components/RomainRecipeCard.jsx'
 import SamuelRecipeCard from './components/SamuelRecipeCard.jsx'
 import OscarRecipeCard from './components/OscarRecipeCard.jsx'
 import VickRecipeCard from './components/VickRecipeCard.jsx'
-import {recipes} from './data.js'
+import { recipes } from './data.js'
 import axios from 'axios'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 
 function App() {
   const [recipes, setRecipes] = useState([])
+  const [error, setError] = useState(null)
+  const [call, setCall] = useState(true)
+  const [category, setCategory] = useState('beef')
+
 
   // CRUD : CREATE / READ / UPDATE / DELETE
   //         POST     GET    PUT     DELETE
+
   const fetchRecipes = async () => {
-    try{
-      const recipes = await axios.get(`URL`)
-      setRecipes(recipes.data.meal)
-    } 
-     
-    catch(err){
+    try {
+      const response = await axios.get(`https://www.themealdb.com/api/json/v1/1/filter.php?c=${category}`)
+      setRecipes(response.data.meals)
+    }
+    catch (err) {
+      setError(err)
       console.log(err)
     }
   }
 
-  fetchRecipes()
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    fetchRecipes()
+  }
+
+  useEffect(() => {
+    fetchRecipes()  
+  }, [])
+
   console.log(recipes)
-  
+
 
   return (
     <>
-      <Navbar /> 
+      <Navbar />
+      <form onSubmit={handleSubmit}>
+          <input type="text" className='border-4' onChange={e => setCategory(e.target.value)} />
+          <input type="submit" value='Search' />
+      </form>
+
+
       <div className='flex space-x-6 m-6 flex-wrap'>
-        {/* {recipes && recipes.map(recipe => {
+        {recipes && recipes.map(recipe => {
           return (
             <div>
                 <h1>{recipe.strMeal}</h1>
-                <img width={'250px'} height={'250px'} src={recipe.strMealThumb} alt="" srcset="" />
-            
-            </div>
+                <img src={recipe.strMealThumb} alt="" />
+            </div> 
           )
-        })} */}
+        })}
 
-      {recipes.map(recipe => <EnzoRecipiceCard {...recipe} />)}
-      {/* 
-      <EnzoRecipiceCard {...recipe}/>
-      <EnzoRecipiceCard {...recipe}/> */}
+
+
       </div>
+
+   
+      {/* 
+      <EnzoRecipiceCard {...recipe}/> */}
+
 
       {/* <IlyesRecipeCard {...recipe} />
 
@@ -75,8 +96,8 @@ function App() {
       <OscarRecipeCard {...recipe}/>
       
       <VickRecipeCard {...recipe}/> */}
-      </>
-    
+    </>
+
   )
 }
 
